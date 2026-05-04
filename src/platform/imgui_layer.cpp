@@ -11,8 +11,8 @@ bool initImGui()
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImFont *font = io.Fonts->AddFontFromFileTTF(
-        RESOURCES_PATH "/fonts/Roboto-Regular.ttf",
-        28.0f);
+        RESOURCES_PATH "fonts/Roboto-Regular.ttf",
+        24.0f);
 
     if (!font)
     {
@@ -23,7 +23,7 @@ bool initImGui()
     rlImGuiReloadFonts();
 
     ImGuiStyle &style = ImGui::GetStyle();
-    style.ScaleAllSizes(2.0f);
+    style.ScaleAllSizes(1.f);
     ImGui::StyleColorsClassic();
 
     return true;
