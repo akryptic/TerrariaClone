@@ -20,7 +20,7 @@ endif()
 #Ensure raylib is built as static libraries
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build raylib as static libraries" FORCE)
 
-project(mygame)
+project(terraria-clone)
 
 #add raylib
 add_subdirectory(thirdparty/raylib-5.0)
