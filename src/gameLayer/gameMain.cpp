@@ -26,7 +26,7 @@ bool initGame()
 
     generateWorld(gameData.gameMap);
 
-    gameData.camera.target = {0, 0}; // world-space center of view, we still use this as the camera position
+    gameData.camera.target = {20, 120}; // world-space center of view, we still use this as the camera position
     gameData.camera.rotation = 0.0f;
     gameData.camera.zoom = 100.0f;
 
@@ -161,6 +161,15 @@ bool updateGame()
 
     ImGui::SliderFloat("Camera zoom: ", &gameData.camera.zoom, 5, 150);
     ImGui::SliderFloat("Camera speed: ", &CAMERA_SPEED, 5, 100);
+
+    ImGui::NewLine();
+    static int targetFPS = 240;
+    const int MAX_FPS = 1000;
+    const char *label = (targetFPS == MAX_FPS) ? "Unlimited" : "%d FPS";
+    if (ImGui::SliderInt("Target FPS: ", &targetFPS, 10, 1000, label))
+    {
+        (targetFPS == MAX_FPS) ? SetTargetFPS(0) : SetTargetFPS(targetFPS);
+    }
 
     ImGui::End();
 
