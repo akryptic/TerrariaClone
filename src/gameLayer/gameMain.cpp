@@ -20,6 +20,8 @@ struct GameData
 
 AssetManager assetManager;
 
+bool showImgui = false;
+
 bool initGame()
 {
     assetManager.loadAll();
@@ -45,6 +47,11 @@ bool updateGame()
 
     ClearBackground({75, 75, 150, 255});
 
+    if (IsKeyPressed(KEY_F3))
+    {
+        showImgui = !showImgui;
+    }
+
 #pragma region camera movement
     static float CAMERA_SPEED = 10;
     if (IsKeyDown(KEY_A))
@@ -69,43 +76,45 @@ bool updateGame()
     int blockX = (int)floor(worldPos.x);
     int blockY = (int)floor(worldPos.y);
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    if (gameData.selectedBlock < 0)
     {
-        auto b = gameData.gameMap.getBlockSafe(blockX, blockY);
-        if (b)
-        {
-            *b = {};
-        }
+        gameData.selectedBlock = 0;
+    }
+    if (gameData.selectedBlock >= Block::BLOCKS_COUNT)
+    {
+        gameData.selectedBlock = Block::BLOCKS_COUNT - 1;
     }
 
-    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+    if (!showImgui)
     {
-        auto b = gameData.gameMap.getBlockSafe(blockX, blockY);
-        if (b)
+
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            b->type = gameData.selectedBlock;
+            auto b = gameData.gameMap.getBlockSafe(blockX, blockY);
+            if (b)
+            {
+                *b = {};
+            }
+        }
+
+        if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+        {
+            auto b = gameData.gameMap.getBlockSafe(blockX, blockY);
+            if (b)
+            {
+                b->type = gameData.selectedBlock;
+            }
+        }
+
+        if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+        {
+            auto b = gameData.gameMap.getBlockSafe(blockX, blockY);
+            if (b)
+            {
+                gameData.selectedBlock = b->type;
+            }
         }
     }
-
-    if (IsKeyPressed(KEY_SPACE))
-    {
-        gameData.selectedBlock++;
-        if (gameData.selectedBlock >= Block::BLOCKS_COUNT)
-        {
-            gameData.selectedBlock = 0;
-        }
-    }
-
-    if (IsKeyPressed(KEY_R))
-    {
-        if (gameData.selectedBlock <= 0)
-        {
-            gameData.selectedBlock = Block::BLOCKS_COUNT - 1;
-        }
-        gameData.selectedBlock--;
-    }
-
-    std::string text = std::string("Selected Block: ") + blockNames[static_cast<int>(gameData.selectedBlock)];
 
     BeginMode2D(gameData.camera);
 
@@ -145,33 +154,66 @@ bool updateGame()
 
     // Draw Selected block
     DrawTexturePro(
-        assetManager.frame,
-        {0, 0, (float)assetManager.frame.width, (float)assetManager.frame.height}, // source
-        {(float)blockX, (float)blockY, 1, 1},                                      // dest
-        {0, 0},                                                                    // origin (top-left corner)
-        0.0f,                                                                      // rotation
-        WHITE                                                                      // tint
+        assetManager.textures,
+        getTextureAtlas(gameData.selectedBlock, 0, 32, 32), // source
+        {(float)blockX, (float)blockY, 1, 1},               // dest
+        {0, 0},                                             // origin (top-left corner)
+        0.0f,                                               // rotation
+        {255, 255, 255, 255 / 2}                            // tint
     );
 
     EndMode2D();
-    DrawText(text.c_str(), 10, 10, 20, WHITE);
-    DrawFPS(10, 40);
 
-    ImGui::Begin("Game Controlls");
-
-    ImGui::SliderFloat("Camera zoom: ", &gameData.camera.zoom, 5, 150);
-    ImGui::SliderFloat("Camera speed: ", &CAMERA_SPEED, 5, 100);
-
-    ImGui::NewLine();
-    static int targetFPS = 240;
-    const int MAX_FPS = 1000;
-    const char *label = (targetFPS == MAX_FPS) ? "Unlimited" : "%d FPS";
-    if (ImGui::SliderInt("Target FPS: ", &targetFPS, 10, 1000, label))
+    if (showImgui)
     {
-        (targetFPS == MAX_FPS) ? SetTargetFPS(0) : SetTargetFPS(targetFPS);
+
+        ImGui::Begin("Game Controls");
+
+        ImGui::SliderFloat("Camera zoom: ", &gameData.camera.zoom, 5, 150);
+        ImGui::SliderFloat("Camera speed: ", &CAMERA_SPEED, 5, 100);
+
+        ImGui::Separator();
+        ImGui::NewLine();
+
+        static int targetFPS = 240;
+        const int MAX_FPS = 1000;
+        const char *label = (targetFPS == MAX_FPS) ? "Unlimited" : "%d FPS";
+        if (ImGui::SliderInt("Target FPS: ", &targetFPS, 10, 1000, label))
+        {
+            (targetFPS == MAX_FPS) ? SetTargetFPS(0) : SetTargetFPS(targetFPS);
+        }
+
+        ImGui::NewLine();
+
+        for (int i = 0; i < Block::BLOCKS_COUNT; i++)
+        {
+            auto atlas = getTextureAtlas(i, 0, 32, 32);
+            atlas.x /= assetManager.textures.width;
+            atlas.width /= assetManager.textures.width;
+            atlas.y /= assetManager.textures.height;
+            atlas.height /= assetManager.textures.height;
+
+            ImGui::PushID(i);
+
+            ImTextureID tex = (ImTextureID)(intptr_t)assetManager.textures.id;
+            if (ImGui::ImageButton(
+                    tex, {35, 35}, {atlas.x, atlas.y}, {atlas.x + atlas.width, atlas.y + atlas.height}))
+            {
+                gameData.selectedBlock = i;
+            }
+
+            ImGui::PopID();
+
+            if (i % 10 != 0)
+            {
+                ImGui::SameLine();
+            }
+        }
+
+        ImGui::End();
     }
 
-    ImGui::End();
+    DrawFPS(10, 40);
 
     return true;
 }
