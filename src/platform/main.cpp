@@ -14,11 +14,11 @@ int main()
 	SetTraceLogLevel(LOG_NONE);
 #endif
 
-	SetConfigFlags(FLAG_WINDOW_TOPMOST);
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(1920, 1080, "Making Game");
 
 	SetExitKey(KEY_NULL);
-	SetTargetFPS(240);
+	// SetTargetFPS(nullptr);
 
 	if (!initImGui())
 	{

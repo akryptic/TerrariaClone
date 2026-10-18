@@ -29,6 +29,9 @@ bool initImGui()
     return true;
 }
 
+#include "../gameLayer/globals.hpp"
+extern GameData gameData;
+
 void beginImGuiFrame()
 {
     rlImGuiBegin();
@@ -37,6 +40,10 @@ void beginImGuiFrame()
     ImGui::PushStyleColor(ImGuiCol_DockingEmptyBg, {});
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
     ImGui::PopStyleColor(2);
+
+    ImGui::Begin("Debug");
+    ImGui::SliderFloat("Camera Zoom", &gameData.camera.zoom, 1.0f, 100.f);
+    ImGui::End();
 }
 
 void endImGuiFrame()

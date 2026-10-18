@@ -10,13 +10,9 @@
 
 #include <cstdint>
 #include <string>
+#include "globals.hpp"
 
-struct GameData
-{
-    GameMap gameMap;
-    Camera2D camera;
-    std::uint16_t selectedBlock = Block::dirt;
-} gameData;
+GameData gameData;
 
 AssetManager assetManager;
 
